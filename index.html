@@ -8,10 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #f59e0b;
             --primary-dark: #d97706;
+            --secondary: #8b5cf6;
             --success: #10b981;
             --danger: #ef4444;
             --bg-dark: #0f0f23;
@@ -19,7 +21,6 @@
             --text: #fff;
             --text-muted: #94a3b8;
             --border: rgba(255, 255, 255, 0.1);
-            --glow: rgba(245, 158, 11, 0.5);
         }
 
         * {
@@ -70,30 +71,16 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
 
-        .hero {
-            text-align: center;
-            padding: 2rem 0;
-        }
-
-        .hero h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-        }
-
-        .hero p {
-            color: var(--text-muted);
-        }
-
-        .stats-grid {
+        .stats-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 1.5rem;
-            margin: 2rem 0;
+            margin-bottom: 2rem;
         }
 
         .stat-card {
@@ -101,25 +88,55 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 1.5rem;
-            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 0.25rem;
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.1), transparent);
         }
 
-        .stat-value.warning {
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .stat-icon.revenue {
+            background: rgba(245, 158, 11, 0.2);
             color: var(--primary);
         }
 
-        .stat-value.danger {
+        .stat-icon.rate {
+            background: rgba(239, 68, 68, 0.2);
             color: var(--danger);
         }
 
-        .stat-value.success {
+        .stat-icon.carts {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--secondary);
+        }
+
+        .stat-icon.recovered {
+            background: rgba(16, 185, 129, 0.2);
             color: var(--success);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
         }
 
         .stat-label {
@@ -127,16 +144,35 @@
             font-size: 0.9rem;
         }
 
+        .stat-trend {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .stat-trend.up {
+            color: var(--success);
+        }
+
+        .stat-trend.down {
+            color: var(--danger);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
 
         .card h3 {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -146,19 +182,84 @@
             color: var(--primary);
         }
 
-        .chart-placeholder {
-            height: 200px;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
+        .chart-container {
+            height: 250px;
+        }
+
+        .funnel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 0;
+        }
+
+        .funnel-step {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .funnel-step:hover {
+            transform: scale(1.02);
+        }
+
+        .funnel-step:nth-child(1) {
+            background: rgba(16, 185, 129, 0.2);
+            width: 100%;
+        }
+
+        .funnel-step:nth-child(2) {
+            background: rgba(6, 182, 212, 0.2);
+            width: 85%;
+        }
+
+        .funnel-step:nth-child(3) {
+            background: rgba(245, 158, 11, 0.2);
+            width: 65%;
+        }
+
+        .funnel-step:nth-child(4) {
+            background: rgba(239, 68, 68, 0.2);
+            width: 45%;
+        }
+
+        .funnel-icon {
+            width: 36px;
+            text-align: center;
+            font-size: 1.25rem;
+        }
+
+        .funnel-info {
+            flex: 1;
+        }
+
+        .funnel-label {
+            font-weight: 500;
+        }
+
+        .funnel-sublabel {
+            font-size: 0.8rem;
             color: var(--text-muted);
         }
 
-        .abandon-reasons {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+        .funnel-value {
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .funnel-percent {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .reasons-list {
+            display: flex;
+            flex-direction: column;
             gap: 1rem;
         }
 
@@ -166,13 +267,15 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 10px;
+        }
+
+        .reason-label {
+            flex: 1;
+            font-size: 0.9rem;
         }
 
         .reason-bar {
-            flex: 1;
+            width: 150px;
             height: 8px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 4px;
@@ -192,7 +295,8 @@
         }
 
         .cart-list {
-            margin-top: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         .cart-item {
@@ -200,14 +304,22 @@
             align-items: center;
             gap: 1rem;
             padding: 1rem;
-            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s;
+        }
+
+        .cart-item:hover {
+            border-color: var(--primary);
         }
 
         .cart-avatar {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -220,27 +332,109 @@
 
         .cart-email {
             font-weight: 500;
+            margin-bottom: 0.25rem;
         }
 
-        .cart-time {
-            font-size: 0.85rem;
+        .cart-meta {
+            font-size: 0.8rem;
             color: var(--text-muted);
         }
 
         .cart-value {
+            text-align: right;
+        }
+
+        .cart-amount {
             font-weight: 700;
+            font-size: 1.1rem;
             color: var(--primary);
+        }
+
+        .cart-items {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .cart-actions {
+            display: flex;
+            gap: 0.5rem;
         }
 
         .btn {
             padding: 0.5rem 1rem;
             border: none;
             border-radius: 8px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
             background: var(--primary);
             color: #000;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .email-template {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        .email-subject {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .email-preview {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .timeline {
+            margin-top: 1.5rem;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 1rem;
+            padding: 0.75rem 0;
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary);
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+
+        .timeline-content {
+            flex: 1;
+            padding-bottom: 1rem;
+            border-left: 2px solid var(--border);
+            margin-left: -7px;
+            padding-left: 1.5rem;
+        }
+
+        .timeline-time {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-text {
+            font-size: 0.9rem;
         }
 
         footer {
@@ -249,17 +443,12 @@
             color: var(--text-muted);
         }
 
-        footer a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
+        @media (max-width: 1024px) {
+            .stats-row {
                 grid-template-columns: repeat(2, 1fr);
             }
 
-            .abandon-reasons {
+            .main-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -268,94 +457,217 @@
 
 <body>
     <div class="bg-gradient"></div>
+
     <header>
         <div class="logo"><i class="fas fa-shopping-cart"></i><span>CartRecovery Pro</span></div>
+        <div style="display: flex; gap: 1rem;">
+            <button class="btn btn-outline"><i class="fas fa-cog"></i> Settings</button>
+            <button class="btn btn-primary"><i class="fas fa-paper-plane"></i> Send Recovery Emails</button>
+        </div>
     </header>
+
     <main class="container">
-        <section class="hero">
-            <h1>Abandoned Cart Analyzer</h1>
-            <p>Understand why customers leave and recover lost revenue</p>
-        </section>
-        <div class="stats-grid">
+        <div class="stats-row">
             <div class="stat-card">
-                <div class="stat-value warning">$12,450</div>
+                <div class="stat-icon revenue"><i class="fas fa-dollar-sign"></i></div>
+                <div class="stat-value">$12,450</div>
                 <div class="stat-label">Lost Revenue (30d)</div>
+                <div class="stat-trend down"><i class="fas fa-arrow-down"></i> 8% from last month</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value danger">68%</div>
+                <div class="stat-icon rate"><i class="fas fa-percent"></i></div>
+                <div class="stat-value">68%</div>
                 <div class="stat-label">Abandonment Rate</div>
+                <div class="stat-trend down"><i class="fas fa-arrow-down"></i> 3% from last month</div>
             </div>
             <div class="stat-card">
+                <div class="stat-icon carts"><i class="fas fa-shopping-cart"></i></div>
                 <div class="stat-value">234</div>
                 <div class="stat-label">Abandoned Carts</div>
+                <div class="stat-trend up"><i class="fas fa-arrow-up"></i> 12 today</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value success">$3,200</div>
+                <div class="stat-icon recovered"><i class="fas fa-undo"></i></div>
+                <div class="stat-value">$3,200</div>
                 <div class="stat-label">Recovered (30d)</div>
+                <div class="stat-trend up"><i class="fas fa-arrow-up"></i> 25% recovery rate</div>
             </div>
         </div>
-        <div class="card">
-            <h3><i class="fas fa-chart-line"></i> Abandonment Trend</h3>
-            <div class="chart-placeholder">📈 Interactive chart visualization</div>
-        </div>
-        <div class="card">
-            <h3><i class="fas fa-question-circle"></i> Top Reasons for Abandonment</h3>
-            <div class="abandon-reasons">
-                <div class="reason-item"><span>High shipping costs</span>
-                    <div class="reason-bar">
-                        <div class="reason-fill" style="width:45%"></div>
-                    </div><span class="reason-percent">45%</span>
+
+        <div class="main-grid">
+            <div>
+                <div class="card">
+                    <h3><i class="fas fa-chart-line"></i> Abandonment Trend</h3>
+                    <div class="chart-container"><canvas id="trendChart"></canvas></div>
                 </div>
-                <div class="reason-item"><span>Required account creation</span>
-                    <div class="reason-bar">
-                        <div class="reason-fill" style="width:23%"></div>
-                    </div><span class="reason-percent">23%</span>
+
+                <div class="card">
+                    <h3><i class="fas fa-filter"></i> Checkout Funnel</h3>
+                    <div class="funnel">
+                        <div class="funnel-step">
+                            <div class="funnel-icon">🛒</div>
+                            <div class="funnel-info">
+                                <div class="funnel-label">Added to Cart</div>
+                                <div class="funnel-sublabel">Initiated checkout</div>
+                            </div>
+                            <div class="funnel-value">1,245</div>
+                            <div class="funnel-percent">100%</div>
+                        </div>
+                        <div class="funnel-step">
+                            <div class="funnel-icon">📝</div>
+                            <div class="funnel-info">
+                                <div class="funnel-label">Entered Info</div>
+                                <div class="funnel-sublabel">Contact details</div>
+                            </div>
+                            <div class="funnel-value">892</div>
+                            <div class="funnel-percent">71%</div>
+                        </div>
+                        <div class="funnel-step">
+                            <div class="funnel-icon">📦</div>
+                            <div class="funnel-info">
+                                <div class="funnel-label">Shipping Selected</div>
+                                <div class="funnel-sublabel">Chose delivery</div>
+                            </div>
+                            <div class="funnel-value">654</div>
+                            <div class="funnel-percent">52%</div>
+                        </div>
+                        <div class="funnel-step">
+                            <div class="funnel-icon">💳</div>
+                            <div class="funnel-info">
+                                <div class="funnel-label">Payment</div>
+                                <div class="funnel-sublabel">Completed purchase</div>
+                            </div>
+                            <div class="funnel-value">398</div>
+                            <div class="funnel-percent">32%</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="reason-item"><span>Complex checkout</span>
-                    <div class="reason-bar">
-                        <div class="reason-fill" style="width:18%"></div>
-                    </div><span class="reason-percent">18%</span>
-                </div>
-                <div class="reason-item"><span>Payment issues</span>
-                    <div class="reason-bar">
-                        <div class="reason-fill" style="width:14%"></div>
-                    </div><span class="reason-percent">14%</span>
+
+                <div class="card">
+                    <h3><i class="fas fa-question-circle"></i> Why Customers Leave</h3>
+                    <div class="reasons-list">
+                        <div class="reason-item"><span class="reason-label">High shipping costs</span>
+                            <div class="reason-bar">
+                                <div class="reason-fill" style="width:45%"></div>
+                            </div><span class="reason-percent">45%</span>
+                        </div>
+                        <div class="reason-item"><span class="reason-label">Account required</span>
+                            <div class="reason-bar">
+                                <div class="reason-fill" style="width:23%"></div>
+                            </div><span class="reason-percent">23%</span>
+                        </div>
+                        <div class="reason-item"><span class="reason-label">Complex checkout</span>
+                            <div class="reason-bar">
+                                <div class="reason-fill" style="width:18%"></div>
+                            </div><span class="reason-percent">18%</span>
+                        </div>
+                        <div class="reason-item"><span class="reason-label">Payment issues</span>
+                            <div class="reason-bar">
+                                <div class="reason-fill" style="width:14%"></div>
+                            </div><span class="reason-percent">14%</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="card">
-            <h3><i class="fas fa-users"></i> Recent Abandoned Carts</h3>
-            <div class="cart-list">
-                <div class="cart-item">
-                    <div class="cart-avatar">JD</div>
-                    <div class="cart-info">
-                        <div class="cart-email">john.doe@email.com</div>
-                        <div class="cart-time">Abandoned 2 hours ago</div>
+
+            <div>
+                <div class="card">
+                    <h3><i class="fas fa-users"></i> Recent Abandoned Carts</h3>
+                    <div class="cart-list">
+                        <div class="cart-item">
+                            <div class="cart-avatar">JD</div>
+                            <div class="cart-info">
+                                <div class="cart-email">john.doe@email.com</div>
+                                <div class="cart-meta">2 hours ago • Left at shipping</div>
+                            </div>
+                            <div class="cart-value">
+                                <div class="cart-amount">$189.99</div>
+                                <div class="cart-items">3 items</div>
+                            </div>
+                            <div class="cart-actions"><button class="btn btn-primary">Recover</button></div>
+                        </div>
+                        <div class="cart-item">
+                            <div class="cart-avatar">SM</div>
+                            <div class="cart-info">
+                                <div class="cart-email">sarah.m@email.com</div>
+                                <div class="cart-meta">5 hours ago • Left at payment</div>
+                            </div>
+                            <div class="cart-value">
+                                <div class="cart-amount">$67.50</div>
+                                <div class="cart-items">1 item</div>
+                            </div>
+                            <div class="cart-actions"><button class="btn btn-primary">Recover</button></div>
+                        </div>
+                        <div class="cart-item">
+                            <div class="cart-avatar">RB</div>
+                            <div class="cart-info">
+                                <div class="cart-email">robert.b@email.com</div>
+                                <div class="cart-meta">1 day ago • Left at info</div>
+                            </div>
+                            <div class="cart-value">
+                                <div class="cart-amount">$299.00</div>
+                                <div class="cart-items">2 items</div>
+                            </div>
+                            <div class="cart-actions"><button class="btn btn-primary">Recover</button></div>
+                        </div>
                     </div>
-                    <div class="cart-value">$189.99</div><button class="btn">Send Reminder</button>
+
+                    <div class="email-template">
+                        <div class="email-subject">📧 Recovery Email Template</div>
+                        <div class="email-preview">Hey {{name}}, you left something behind! Complete your order now and
+                            get 10% off with code COMEBACK10...</div>
+                        <button class="btn btn-outline" style="margin-top: 1rem;"><i class="fas fa-edit"></i> Edit
+                            Template</button>
+                    </div>
                 </div>
-                <div class="cart-item">
-                    <div class="cart-avatar">SM</div>
-                    <div class="cart-info">
-                        <div class="cart-email">sarah.m@email.com</div>
-                        <div class="cart-time">Abandoned 5 hours ago</div>
+
+                <div class="card">
+                    <h3><i class="fas fa-clock"></i> Recovery Timeline</h3>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-time">2 hours ago</div>
+                                <div class="timeline-text">Email sent to john.doe@email.com</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot" style="background: var(--success);"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-time">5 hours ago</div>
+                                <div class="timeline-text">✓ Cart recovered: $156.00</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-time">1 day ago</div>
+                                <div class="timeline-text">Email opened by mike@email.com</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="cart-value">$67.50</div><button class="btn">Send Reminder</button>
-                </div>
-                <div class="cart-item">
-                    <div class="cart-avatar">RB</div>
-                    <div class="cart-info">
-                        <div class="cart-email">robert.b@email.com</div>
-                        <div class="cart-time">Abandoned 1 day ago</div>
-                    </div>
-                    <div class="cart-value">$299.00</div><button class="btn">Send Reminder</button>
                 </div>
             </div>
         </div>
     </main>
+
     <footer>
         <p>Part of the <a href="#">ShopifyHero Tools</a> suite</p>
     </footer>
+
+    <script>
+        new Chart(document.getElementById('trendChart'), {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [
+                    { label: 'Abandoned', data: [45, 52, 38, 61, 43, 55, 48], borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', fill: true, tension: 0.4 },
+                    { label: 'Recovered', data: [12, 15, 11, 18, 14, 16, 15], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.4 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: '#94a3b8' } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } } } }
+        });
+    </script>
 </body>
 
 </html>
