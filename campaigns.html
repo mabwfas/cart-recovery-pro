@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaigns - CartRecovery Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="api.js"></script>
+    <style>
+        :root {
+            --primary: #f97316;
+            --bg: #0f0f23;
+            --card: rgba(255, 255, 255, 0.05);
+            --text: #fff;
+            --muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background: rgba(15, 15, 35, 0.95);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: var(--primary);
+        }
+
+        .nav-link {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--muted);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-link:hover {
+            background: var(--card);
+        }
+
+        .nav-link.active {
+            background: rgba(249, 115, 22, 0.15);
+            color: var(--primary);
+        }
+
+        .main {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .campaign-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1rem;
+        }
+
+        .campaign-card {
+            transition: all 0.3s;
+        }
+
+        .campaign-card:hover {
+            border-color: var(--primary);
+        }
+
+        .campaign-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .campaign-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .badge-active {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .badge-paused {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--card);
+            color: var(--text);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="sidebar">
+        <div class="logo"><i class="fas fa-cart-arrow-down"></i> CartRecovery</div>
+        <a href="index.html" class="nav-link"><i class="fas fa-shopping-cart"></i> Carts</a>
+        <a href="campaigns.html" class="nav-link active"><i class="fas fa-bullhorn"></i> Campaigns</a>
+        <a href="templates.html" class="nav-link"><i class="fas fa-envelope"></i> Templates</a>
+        <a href="analytics.html" class="nav-link"><i class="fas fa-chart-line"></i> Analytics</a>
+    </nav>
+
+    <main class="main">
+        <div class="header">
+            <div>
+                <h1 class="title">Email Campaigns</h1>
+                <p style="color: var(--muted); margin-top: 0.25rem;">Automated cart recovery campaigns</p>
+            </div>
+            <button class="btn btn-primary" onclick="showModal()"><i class="fas fa-plus"></i> New Campaign</button>
+        </div>
+
+        <div class="campaign-grid" id="campaignGrid"></div>
+    </main>
+
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 1.5rem;">Create Campaign</h3>
+            <div class="form-group"><label class="form-label">Campaign Name</label><input type="text" class="form-input"
+                    id="campName" placeholder="e.g. Summer Recovery"></div>
+            <div class="form-group"><label class="form-label">Email Template</label><select class="form-select"
+                    id="campTemplate"></select></div>
+            <div class="form-group"><label class="form-label">Trigger After (hours)</label><input type="number"
+                    class="form-input" id="campDelay" value="1" min="1"></div>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="createCampaign()" style="flex: 1;"><i
+                        class="fas fa-rocket"></i> Launch</button>
+                <button class="btn btn-outline" onclick="hideModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loadCampaigns() {
+            const campaigns = RecoveryAPI.campaigns.getAll();
+            const templates = RecoveryAPI.templates.getAll();
+
+            // Populate template select
+            document.getElementById('campTemplate').innerHTML = templates.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+
+            const container = document.getElementById('campaignGrid');
+            if (campaigns.length === 0) {
+                container.innerHTML = '<div class="card" style="text-align: center; padding: 3rem; color: var(--muted); grid-column: 1/-1;">No campaigns yet. Create your first automated recovery campaign!</div>';
+                return;
+            }
+
+            container.innerHTML = campaigns.map(c => `
+                <div class="card campaign-card">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div class="campaign-title"><i class="fas fa-bullhorn" style="color: var(--primary);"></i> ${c.name}</div>
+                        <span class="badge ${c.status === 'active' ? 'badge-active' : 'badge-paused'}">${c.status}</span>
+                    </div>
+                    <div class="campaign-stats">
+                        <div class="stat"><div class="stat-value">${c.sent || 0}</div><div class="stat-label">Emails Sent</div></div>
+                        <div class="stat"><div class="stat-value">${c.recovered || 0}</div><div class="stat-label">Recovered</div></div>
+                        <div class="stat"><div class="stat-value">${c.sent ? ((c.recovered / c.sent) * 100).toFixed(0) : 0}%</div><div class="stat-label">Success</div></div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-sm ${c.status === 'active' ? 'btn-outline' : 'btn-primary'}" onclick="toggleCampaign('${c.id}')">
+                            <i class="fas fa-${c.status === 'active' ? 'pause' : 'play'}"></i> ${c.status === 'active' ? 'Pause' : 'Resume'}
+                        </button>
+                        <button class="btn btn-sm btn-outline" onclick="deleteCampaign('${c.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showModal() { document.getElementById('createModal').classList.add('active'); }
+        function hideModal() { document.getElementById('createModal').classList.remove('active'); }
+
+        function createCampaign() {
+            const name = document.getElementById('campName').value.trim();
+            const templateId = document.getElementById('campTemplate').value;
+            const delay = parseInt(document.getElementById('campDelay').value) || 1;
+
+            if (!name) { alert('Please enter a campaign name'); return; }
+
+            RecoveryAPI.campaigns.add({ name, templateId, delayHours: delay });
+            hideModal();
+            loadCampaigns();
+            RecoveryAPI.toast.show('Campaign launched!');
+        }
+
+        function toggleCampaign(id) {
+            const campaigns = RecoveryAPI.campaigns.getAll();
+            const camp = campaigns.find(c => c.id === id);
+            if (camp) {
+                camp.status = camp.status === 'active' ? 'paused' : 'active';
+                RecoveryAPI.campaigns.save(campaigns);
+                loadCampaigns();
+            }
+        }
+
+        function deleteCampaign(id) {
+            if (!confirm('Delete this campaign?')) return;
+            let campaigns = RecoveryAPI.campaigns.getAll();
+            campaigns = campaigns.filter(c => c.id !== id);
+            RecoveryAPI.campaigns.save(campaigns);
+            loadCampaigns();
+        }
+
+        loadCampaigns();
+    </script>
+</body>
+
+</html>
